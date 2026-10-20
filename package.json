@@ -1,0 +1,14 @@
+{
+  "name": "rodando-utp",
+  "version": "5.1.0",
+  "private": true,
+  "description": "PWA de movilidad colaborativa universitaria con EcoRodando: EcoPuntos, niveles, insignias, impacto estimado, Node.js, SQLite y seguridad aplicada.",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --no-warnings server.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

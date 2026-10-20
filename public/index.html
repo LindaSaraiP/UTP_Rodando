@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f6b38">
+  <meta name="description" content="Rodando UTP con viajes de conexión, Rodando Parking, panel de administración y PWA instalable.">
+  <title>Rodando UTP | Rodando Parking</title>
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/img/icon-192.png" type="image/png">
+  <link rel="stylesheet" href="/css/styles.css?v=5.1.0">
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell nav">
+      <a class="brand" href="#inicio">
+        <span class="brand-mark">R</span>
+        <span>Rodando <b>UTP</b></span>
+      </a>
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false">Menu</button>
+      <nav class="nav-links" id="navLinks">
+        <a href="#proyecto">Proyecto</a>
+        <a href="#rutas">Rutas</a>
+        <a href="#parking">Rodando Parking</a>
+        <a href="#dashboard">Mi panel</a>
+        <a href="#adminPanel" id="adminNavLink" hidden>Administración</a>
+        <button class="btn ghost small" id="installBtn" hidden>Instalar app</button>
+        <button class="btn ghost small" id="loginBtn">Iniciar sesión</button>
+        <button class="btn primary small" id="registerBtn">Crear cuenta</button>
+        <button class="user-pill" id="userMenuBtn" hidden>
+          <span id="userInitial">U</span>
+          <span id="userName">Usuario</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <span class="eyebrow">Movilidad colaborativa universitaria</span>
+        <h1>Comparte tu trayecto y activa <span>Rodando Parking</span>.</h1>
+        <p>Esta versión incorpora rutas directas, viajes con punto de conexión en cualquier hub y un programa de estacionamiento colaborativo para conductores que trasladan a varios compañeros.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#rutas">Buscar viaje</a>
+          <button class="btn outline" id="publishHeroBtn">Publicar ruta</button>
+        </div>
+        <div class="stats">
+          <div><strong>PWA</strong><span>Instalable y responsive</span></div>
+          <div><strong>Parking</strong><span>Pase colaborativo</span></div>
+          <div><strong>Admin</strong><span>Gestión y estadísticas</span></div>
+        </div>
+      </div>
+      <div class="hero-art">
+        <img src="/img/hero-carpool.svg" alt="Estudiantes compartiendo un automóvil rumbo a la universidad">
+      </div>
+    </section>
+
+    <section class="shell" id="proyecto">
+      <div class="section-head split">
+        <div>
+          <span class="eyebrow">Propuesta actualizada</span>
+          <h2>Dos funciones nuevas para diferenciar el proyecto</h2>
+          <p>La plataforma ahora soporta viajes con punto de conexión y una dinámica de estacionamiento colaborativo basada en ocupación real del vehículo.</p>
+        </div>
+      </div>
+      <div class="cards-2">
+        <article class="info-card">
+          <span class="card-kicker">Viaje con punto de conexión</span>
+          <h3>Abordaje en cualquier hub autorizado</h3>
+          <p>El conductor puede publicar un trayecto con modalidad de conexión. Así, el pasajero identifica un punto común de encuentro como Parque Puebla, Solesta o Explanada y se integra a la ruta desde ese lugar.</p>
+          <ul>
+            <li>Filtro por hub de abordaje.</li>
+            <li>Modo de viaje directo o con conexión.</li>
+            <li>Mayor cobertura sin duplicar rutas.</li>
+          </ul>
+        </article>
+        <article class="info-card">
+          <span class="card-kicker">Rodando Parking</span>
+          <h3>Pase para estacionamiento colaborativo</h3>
+          <p>Si una ruta fue marcada para Rodando Parking y reúne al menos dos lugares reservados, el conductor puede generar un código de pase desde su panel. Esto permite presentar evidencia de viaje compartido.</p>
+          <ul>
+            <li>Validación por reservaciones confirmadas.</li>
+            <li>Código único generado desde el backend.</li>
+            <li>Estadísticas para la administración.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="shell" id="rutas">
+      <div class="section-head split">
+        <div>
+          <span class="eyebrow">Rutas disponibles</span>
+          <h2>Encuentra un trayecto</h2>
+          <p>Consulta rutas activas, filtra por modo de viaje, punto de conexión y número de lugares disponibles.</p>
+        </div>
+        <div class="status-group">
+          <div class="online-badge" id="networkBadge">En línea</div>
+          <div class="pwa-badge" id="pwaStatus">PWA lista</div>
+        </div>
+      </div>
+      <form class="filters" id="searchForm">
+        <label><span>Zona de salida</span><input id="originFilter" name="origin" maxlength="60" placeholder="Ej. Cholula"></label>
+        <label><span>Fecha</span><input id="dateFilter" type="date" name="date"></label>
+        <label><span>Lugares</span><select id="seatFilter" name="seats"><option value="1">1 o más</option><option value="2">2 o más</option><option value="3">3 o más</option><option value="4">4</option></select></label>
+        <label><span>Modo</span><select id="modeFilter" name="mode"><option value="">Todos</option><option value="direct">Directo</option><option value="hub">Con conexión</option></select></label>
+        <label><span>Hub</span><input id="hubFilter" name="hub" maxlength="60" placeholder="Ej. Parque Puebla"></label>
+        <button class="btn primary" type="submit">Buscar rutas</button>
+      </form>
+      <div class="results-bar">
+        <span id="resultText">Cargando rutas...</span>
+        <button class="link-btn" type="button" id="clearFilters">Limpiar filtros</button>
+      </div>
+      <div class="routes-grid" id="routesGrid"></div>
+      <div class="empty" id="routesEmpty" hidden>
+        <h3>No encontramos rutas disponibles</h3>
+        <p>Prueba otra fecha, otra zona o publica un viaje nuevo.</p>
+      </div>
+    </section>
+
+    <section class="shell" id="parking">
+      <div class="section-head centered">
+        <span class="eyebrow">Rodando Parking</span>
+        <h2>Estacionamiento colaborativo con evidencia digital</h2>
+        <p>El programa premia viajes que realmente transportan a más estudiantes. El pase se genera desde el panel del conductor cuando existen al menos dos lugares reservados en una ruta marcada para parking.</p>
+      </div>
+      <div class="parking-layout">
+        <div class="parking-card">
+          <h3>Condiciones para generar el pase</h3>
+          <ol>
+            <li>Publicar una ruta con la opción Rodando Parking activada.</li>
+            <li>Recibir al menos dos reservaciones confirmadas.</li>
+            <li>Generar el código desde el panel personal.</li>
+          </ol>
+        </div>
+        <div class="parking-card">
+          <h3>Panel administrativo</h3>
+          <p>El administrador puede revisar cuántas rutas usan conexión, cuántas participan en Rodando Parking y el total de usuarios y reservaciones activas.</p>
+          <p class="note">La cuenta de administrador se crea automáticamente al iniciar el proyecto.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell admin-section" id="adminPanel" hidden>
+      <div class="section-head split">
+        <div>
+          <span class="eyebrow">Administrador</span>
+          <h2>Gestión de usuarios y estadísticas</h2>
+          <p>Administra usuarios registrados, roles, verificación y estadísticas generales del sistema.</p>
+          <p class="note"><strong>Acciones disponibles:</strong> verificar usuarios, asignar o retirar rol de administrador y eliminar cuentas.</p>
+        </div>
+      </div>
+      <div class="admin-stats" id="adminStats"></div>
+      <div class="admin-users-wrap">
+        <div class="dash-title"><h3>Usuarios registrados</h3><button class="link-btn" id="refreshAdminBtn" type="button">Actualizar</button></div>
+        <div id="adminUsers" class="admin-users"></div>
+      </div>
+    </section>
+
+    <section class="shell dashboard" id="dashboard" hidden>
+      <div class="section-head split">
+        <div>
+          <span class="eyebrow">Mi cuenta</span>
+          <h2>Panel de usuario</h2>
+          <p>Administra rutas publicadas, reservaciones y estadísticas personales.</p>
+        </div>
+        <button class="btn primary" id="publishDashboardBtn">Publicar ruta</button>
+      </div>
+      <div class="eco-dashboard">
+        <div class="eco-profile">
+          <div class="eco-level-icon" id="ecoLevelIcon">SE</div>
+          <div>
+            <span class="muted-label">Nivel EcoRodando</span>
+            <h3 id="ecoLevelName">Semilla</h3>
+            <p><b id="ecoPoints">0</b> EcoPuntos · <span id="ecoNextLevel">Comparte tu primer viaje.</span></p>
+          </div>
+        </div>
+        <div class="eco-progress"><div id="ecoProgressFill"></div></div>
+        <div class="eco-user-stats">
+          <div><strong id="ecoTrips">0</strong><small>viajes</small></div>
+          <div><strong id="ecoSeats">0</strong><small>lugares compartidos</small></div>
+          <div><strong id="ecoCo2">0 kg</strong><small>CO₂e estimado</small></div>
+          <div><strong id="ecoContribution">$0</strong><small>cooperación</small></div>
+        </div>
+        <div class="eco-badges" id="ecoBadges"></div>
+        <p class="eco-method" id="ecoUserMethod"></p>
+      </div>
+      <div class="dashboard-grid">
+        <div class="dash-card">
+          <div class="dash-title"><h3>Mis rutas publicadas</h3><span id="publishedCount">0</span></div>
+          <div id="publishedList" class="dash-list"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-title"><h3>Mis reservaciones</h3><span id="reservationCount">0</span></div>
+          <div id="reservationList" class="dash-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="shell publication-section" id="publicacion">
+      <div class="publication-card">
+        <div>
+          <span class="eyebrow">Publicación</span>
+          <h2>URL del proyecto</h2>
+          <div class="url-box"><code id="publicationUrl">http://localhost:3000</code><button class="copy-button" id="copyUrlBtn" type="button">Copiar</button></div>
+          <p class="publication-note" id="publicationNote">En localhost puedes desarrollar e instalar la PWA. Para la entrega final publícalo en un servicio Node con HTTPS.</p>
+        </div>
+        <div class="publication-checks">
+          <span>Manifest válido</span>
+          <span>Service Worker</span>
+          <span>Diseño responsive</span>
+          <span>SQLite real</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-grid">
+      <div>
+        <div class="brand"><span class="brand-mark">R</span><span>Rodando <b>UTP</b></span></div>
+        <p>Proyecto académico de movilidad colaborativa enfocado en estudiantes de la Universidad Tecnológica de Puebla.</p>
+      </div>
+      <div>
+        <b>Proyecto</b>
+        <a href="#proyecto">Innovación</a>
+        <a href="#parking">Rodando Parking</a>
+      </div>
+      <div>
+        <b>Aplicación</b>
+        <a href="#rutas">Rutas</a>
+        <a href="#dashboard">Mi panel</a>
+      </div>
+      <div>
+        <b>Tecnologías</b>
+        <span>HTML, CSS, JavaScript</span>
+        <span>Node.js y SQLite</span>
+        <span>PWA y Service Worker</span>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast-stack" id="toastStack"></div>
+
+  <dialog class="modal" id="authModal">
+    <form method="dialog" class="modal-card" id="authForm">
+      <button class="modal-close" value="cancel" aria-label="Cerrar">×</button>
+      <span class="eyebrow" id="authEyebrow">Acceso</span>
+      <h2 id="authTitle">Iniciar sesión</h2>
+      <p id="authSubtitle">Usa tu correo institucional.</p>
+      <input type="hidden" id="authMode" value="login">
+      <div class="form-grid one">
+        <label class="register-only" hidden><span>Nombre completo</span><input id="authName" maxlength="80"></label>
+        <label class="register-only" hidden><span>Matrícula</span><input id="authStudentId" maxlength="24"></label>
+        <label><span>Correo institucional</span><input id="authEmail" type="email" required></label>
+        <label><span>Contraseña</span><input id="authPassword" type="password" minlength="10" maxlength="128" required><small class="register-only" hidden>Debe incluir mayúscula, minúscula y número.</small></label>
+      </div>
+      <p class="form-error" id="authError" hidden></p>
+      <div class="modal-actions">
+        <button class="btn primary full" id="authSubmit" value="default">Entrar</button>
+        <button type="button" class="link-btn" id="switchAuth">¿No tienes cuenta? Regístrate</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="publishModal">
+    <form method="dialog" class="modal-card wide" id="publishForm">
+      <button class="modal-close" value="cancel" aria-label="Cerrar">×</button>
+      <span class="eyebrow">Nueva ruta</span>
+      <h2>Publica un viaje</h2>
+      <p>Registra únicamente trayectos que ya ibas a realizar.</p>
+      <div class="form-grid two">
+        <label><span>Zona de salida</span><input name="origin" required maxlength="60" placeholder="Ej. Cholula"></label>
+        <label><span>Punto de encuentro</span><input name="pickupPoint" required maxlength="120" placeholder="Lugar público y seguro"></label>
+        <label><span>Fecha y hora</span><input name="departureAt" type="datetime-local" required></label>
+        <label><span>Lugares disponibles</span><select name="seatsTotal"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
+        <label><span>Aportación por persona (MXN)</span><input name="contribution" type="number" min="0" max="500" step="1" required></label>
+        <label><span>Vehículo</span><input name="vehicle" required maxlength="60"></label>
+        <label><span>Color</span><input name="color" required maxlength="30"></label>
+        <label><span>Últimos 4 caracteres de placa</span><input name="plateLast4" required minlength="3" maxlength="4"></label>
+        <label><span>Modo de viaje</span><select name="connectionMode" id="publishConnectionMode"><option value="direct">Directo</option><option value="hub">Con conexión</option></select></label>
+        <label id="connectionHubWrap" hidden><span>Hub de conexión</span><input name="connectionHub" maxlength="80" placeholder="Ej. Parque Puebla"></label>
+        <label class="check"><input type="checkbox" name="parkingEligible" value="1"><span>Participar en Rodando Parking</span></label>
+        <label class="span-2"><span>Notas</span><textarea name="notes" maxlength="240" rows="3" placeholder="Indicaciones adicionales"></textarea></label>
+      </div>
+      <div class="modal-actions row">
+        <button class="btn ghost" value="cancel">Cancelar</button>
+        <button class="btn primary" id="publishSubmit" value="default">Publicar ruta</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="reserveModal">
+    <form method="dialog" class="modal-card" id="reserveForm">
+      <button class="modal-close" value="cancel" aria-label="Cerrar">×</button>
+      <span class="eyebrow">Reservación</span>
+      <h2 id="reserveTitle">Apartar lugar</h2>
+      <div id="reserveSummary" class="reserve-summary"></div>
+      <input type="hidden" id="reserveRideId">
+      <label><span>Número de lugares</span><select id="reserveSeats"></select></label>
+      <div class="modal-actions row">
+        <button class="btn ghost" value="cancel">Cancelar</button>
+        <button class="btn primary" id="reserveSubmit" value="default">Confirmar reserva</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="userModal">
+    <div class="modal-card compact">
+      <button class="modal-close" id="closeUserModal" aria-label="Cerrar">×</button>
+      <span class="eyebrow">Mi cuenta</span>
+      <h2 id="accountName">Usuario</h2>
+      <p id="accountEmail"></p>
+      <div class="account-actions">
+        <a class="btn outline full" href="#dashboard" id="goDashboard">Ver mi panel</a>
+        <button class="btn danger full" id="logoutBtn">Cerrar sesión</button>
+      </div>
+    </div>
+  </dialog>
+
+  <noscript><div class="noscript">Rodando UTP necesita JavaScript para funcionar correctamente.</div></noscript>
+  <script src="/js/app.js?v=5.1.0" defer></script>
+  <script>
+    // Registrar el Service Worker para habilitar la PWA y la caché sin conexión.
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.info('Rodando UTP: Service Worker registrado.', registration.scope);
+          })
+          .catch(error => {
+            console.error('Rodando UTP: error al registrar el Service Worker.', error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
